@@ -1,0 +1,53 @@
+# name: Deploy MultiDocker
+# on:
+#   push:
+#     branches: [main]
+
+# jobs:
+#   build:
+#     env:
+#       CI: true
+#     strategy:
+#       matrix:
+#         node-version: [18.13]
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v3
+#       - uses: actions/setup-node@v3
+#         with:
+#           node-version: ${{ matrix.node-version }}
+
+#       - name: Docker Login
+#         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login docker.io -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+#       - run: docker build -t santgt5/react-test -f ./client/Dockerfile.dev ./client
+#       - run: docker run -e CI=true santgt5/react-test npm run test
+
+#       - run: docker build -t santgt5/client-complex-pro ./client
+#       - run: docker build -t santgt5/nginx-complex ./nginx
+#       - run: docker build -t santgt5/server-complex ./server
+#       - run: docker build -t santgt5/worker-complex ./worker
+
+#       - run: docker push santgt5/client-complex-pro
+#       - run: docker push santgt5/nginx-complex
+#       - run: docker push santgt5/server-complex
+#       - run: docker push santgt5/worker-complex
+#         name: Push containers
+
+#       - name: Generate deployment package
+#         run: zip -r deploy.zip . -x '*.git*'
+
+
+#       - name: AWS - Beanstalk Deploy
+#         uses: einaregilsson/beanstalk-deploy@v21
+#         with:
+#           aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
+#           aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
+#           application_name: docker-com-app
+#           environment_name: docker-com-app
+#           existing_bucket_name: elasticbeanstalk-eu-west-1-075759264670
+#           version_label: ${{ github.sha }}
+#           use_existing_version_if_available: true
+#           region: eu-west-1
+#           wait_for_deployment: true
+#           deployment_package: deploy.zip
